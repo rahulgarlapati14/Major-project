@@ -2,12 +2,16 @@
 import React, { Component } from 'react';
 import Web3 from 'web3';
 import './App.css';
-import Meme from '../abis/Meme.json'
-
+import Meme from '../abis/Meme.json';
+import Loader from 'react-loader-spinner';
 
 const ipfsClient = require('ipfs-http-client')
 const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) 
 
+
+const deepai = require('deepai'); // OR include deepai.min.js as a script tag in your HTML
+
+deepai.setApiKey('340ce7cb-652a-499f-8cff-dcd05c1d0d49');
 
 class Ver extends Component {
 
@@ -39,16 +43,15 @@ class Ver extends Component {
     if(networkData) {
       const contract = web3.eth.Contract(Meme.abi, networkData.address)
       this.setState({ contract })
-      const memeHash = await contract.methods.get().call()
-      this.setState({ memeHash })
-      this.setState({ethAddress:networkData.address})
+      
+      this.retEvents();
     } else {
       window.alert('Smart contract not deployed to detected network.')
     }
   }
 
   state = {
-      memeHash: '',
+      
       contract: null,
       web3: null,
       buffer: null,
@@ -57,10 +60,37 @@ class Ver extends Component {
       blockNumber:'',
       transactionHash:'',
       gasUsed:'',
-      txReceipt: '' 
+      txReceipt: '',
+      imgURLS:[],
+      fakeImage:'',
+      originalImage:'',
+      loading:false
     }
   
+    
+    retHash= async(args)=>{
+      //console.log(args)
+      let re=[]
+      for(let i=0;i<args.length;i++){
+        //console.log(args[i].returnValues[1])
+        re.push(`https://ipfs.infura.io/ipfs/`+args[i].returnValues[1])
+      }
+      this.setState({imgURLS:re})
+     // console.log(re)
+      
+    }
 
+ retEvents= async () =>{
+     
+    let t=this;
+    this.state.contract.getPastEvents('HashCreated', {
+      fromBlock: 0,
+      toBlock: 'latest'
+  },function(error, events){ 
+      t.retHash(events);
+    //console.log(events); 
+    })
+  }
 
 //1
   captureFile = (event) => {
@@ -72,7 +102,7 @@ class Ver extends Component {
     
     reader.onloadend = () => {
       this.setState({ buffer: Buffer(reader.result) })
-      console.log('buffer', this.state.buffer)
+     // console.log('buffer', this.state.buffer)
     }
   }
 
@@ -83,41 +113,49 @@ class Ver extends Component {
     console.log("Submitting file to ipfs...")
     
     ipfs.add(this.state.buffer, (error, result) => {
-      console.log('Ipfs result', result)
+      console.log('Ipfs result', result);
+      this.verifyImage(`https://ipfs.infura.io/ipfs/`+result[0].hash);
       if(error) {
-        console.error(error)
+        console.error(error);
         return
       }
-      
-      this.state.contract.methods.set(result[0].hash).send({ from: this.state.account }, (error, transactionHash) => {
-        console.log(transactionHash);
-        this.setState({transactionHash});
-      }).then((r) => {
-         return this.setState({ memeHash: result[0].hash })
-       })
+
     })
+
   }
-//
 
-  onSelect = async () => {
-    const web3 = window.web3
-    try{
-            this.setState({blockNumber:"waiting.."});
-            this.setState({gasUsed:"waiting..."});
-   
-    //get Transaction Receipt in console on click
-    await web3.eth.getTransactionReceipt(this.state.transactionHash, (err, txReceipt)=>{
-              console.log(err,txReceipt);
-              this.setState({txReceipt});
-            }); //await for getTransactionReceipt
-    await this.setState({blockNumber: this.state.txReceipt.blockNumber});
-            await this.setState({gasUsed: this.state.txReceipt.gasUsed});    
-          } //try
-        catch(error){
-            console.log(error);
-          } //catch
+  
 
-  } //onClick
+verifyImage = async(upHash)=>{
+  this.setState({fakeImage:upHash});  
+  console.log(upHash);
+
+  this.setState({loading:true});
+  //  var resp = await deepai.callStandardApi("image-similarity", {
+    //        image1: upHash,
+      //      image2: "https://ipfs.infura.io/ipfs/QmcsuhM6gxAbBMcFgGu1PTjwxwrueoZotEHDM9yKkv76pe",
+    //});
+    //console.log(resp.output.distance);
+    
+    console.log(this.state.imgURLS);
+    var imgURLS=this.state.imgURLS;
+    var dist=[]
+    for(let i=0;i<imgURLS.length;i++)
+    {
+      var resp = await deepai.callStandardApi("image-similarity", {
+        image1: upHash,
+        image2: imgURLS[i],
+        });
+      dist.push(resp.output.distance);
+    }
+    this.setState({originalImage:imgURLS[dist.indexOf(Math.min(...dist))],loading:false})
+    
+
+    console.log(dist);
+    console.log(dist.indexOf(Math.min(...dist))+this.state.fakeImage);  
+}
+
+
 
 
   render() {
@@ -146,7 +184,6 @@ class Ver extends Component {
                 <a
                   href=""
                 >
-               <center> <img alt="Stored img" src={`https://ipfs.infura.io/ipfs/${this.state.memeHash}`} /></center>
                 </a>
                 <p>&nbsp;</p>
                 <h2>Upload Image</h2>
@@ -157,43 +194,29 @@ class Ver extends Component {
                 </form>
                 
                 <p>&nbsp;</p>
-  <button onClick = {this.onSelect}> Get Transaction Receipt </button>
-  <table width="120%">
-                <thead>
-                  <tr>
-                    <th>Tx Receipt Category</th>
-                    <th>Values</th>
-                  </tr>
-                </thead>
-               
-                <tbody>
-                  <tr>
-                    <td>IPFS Hash Stored on Eth Contract</td>
-                    <td>{this.state.memeHash}</td>
-                  </tr>
-                  <tr>
-                    <td>Ethereum Contract Address</td>
-                    <td>{this.state.ethAddress}</td>
-                  </tr>
-                  <tr>
-                    <td>Transaction Hash  </td>
-                    <td>{this.state.transactionHash}</td>
-                  </tr>
-                  <tr>
-                    <td>Block Number </td>
-                    <td>{this.state.blockNumber}</td>
-                  </tr>
-                  <tr>
-                    <td>Gas Used</td>
-                    <td>{this.state.gasUsed}</td>
-                  </tr>
-                
-                </tbody>
-            </table>
-
               </div>
             </main>
           </div>
+        </div>
+
+        <div >
+          
+          <table width="70%">
+            <tr>
+              <th><h1>Uploaded Image</h1></th>
+              <th><h2>Original Image</h2></th>
+            </tr>
+
+            <tr>
+              <td><img alt="" src={this.state.fakeImage} /></td>
+              <td>
+                  {<Loader visible={this.state.loading} type="Rings"  />}
+                  <img alt="" src={this.state.originalImage} />
+              </td>
+            </tr>
+          
+          </table>
+          
         </div>
       </div>
     );  
