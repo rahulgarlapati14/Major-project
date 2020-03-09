@@ -129,9 +129,11 @@ constructor(props){
 
     await web3.eth.getBlock(this.state.blockNumber,(err,blk)=>{
         console.log(err,blk.timestamp);
-        this.setState({timestamp:blk.timestamp});
-    //console.log(new Intl.DateTimeFormat('en-US',{year: 'numeric', month: '2-digit',day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',timezone:'Asia/Kolkata',}).format(blk.timestamp));
-
+        let utcSeconds=blk.timestamp;
+      let d=new Date(0);
+      d.setUTCSeconds(utcSeconds);
+        this.setState({timestamp:d.toString()});
+   
     })
     
     this.setState({ht:false});

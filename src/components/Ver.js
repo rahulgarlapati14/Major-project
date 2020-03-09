@@ -185,6 +185,7 @@ verifyImage = async(upHash)=>{
                   href=""
                 >
                 </a>
+                <h1>Image Verification</h1>
                 <p>&nbsp;</p>
                 <h2>Upload Image</h2>
                 <p>&nbsp;</p>
