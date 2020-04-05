@@ -72,7 +72,8 @@ class Ver extends Component {
     originalImage: '',
     loading: false,
     latestbno: [],
-    latesttimes:[]
+    latesttimes:[],
+    simscore:''
   }
 
   async getBlockDetails() {
@@ -166,8 +167,7 @@ class Ver extends Component {
 
   }
 
-
-
+  
   verifyImage = async (upHash) => {
 
     this.setState({ fakeImage: upHash });
@@ -197,12 +197,16 @@ class Ver extends Component {
       function (response) {
         console.log(response.hits[0].score);
         console.log(response.hits[0].input.data.image);
-        t.setState({ originalImage: response.hits[0].input.data.image.url, loading: false })
+        t.setState({ originalImage: response.hits[0].input.data.image.url,
+                     simscore:response.hits[0].score,
+                    loading: false })
+  
       },
       function (err) {
         console.log(err);
       }
     );
+    
 
     let a=t.state.originalImage;
     let b=t.state.imgURLS;
@@ -210,29 +214,10 @@ class Ver extends Component {
     console.log(c[b.indexOf(a)])
     this.setState({orgimgtime:c[b.indexOf(a)]})
 
-    /* 
-    var dist = []
-     for(let i=0;i<imgURLS.length;i++)
-     {
-       var resp = await deepai.callStandardApi("image-similarity", {
-         image1: upHash,
-         image2: imgURLS[i],
-         });
-       dist.push(resp.output.distance);
-     }
- 
-     this.setState({originalImage:imgURLS[dist.indexOf(Math.min(...dist))],loading:false})
-     
- 
-     console.log(dist);
-     console.log(dist.indexOf(Math.min(...dist))+this.state.fakeImage); 
-     
-     */
+   
   }
 
-
-
-
+  
   render() {
 
     return (
@@ -281,7 +266,7 @@ class Ver extends Component {
             <tr>
               <th>Uploaded Image</th>
               <th>Original Image</th>
-              <th>Timestamp of Orginal Image</th>
+              <th>Details</th>
             </tr>
 
             <tr>
@@ -290,7 +275,9 @@ class Ver extends Component {
                 {<Loader visible={this.state.loading} type="Rings" height='200' width='200' />}
                 <img alt="" src={this.state.originalImage} />
               </td>
-              <td>{this.state.orgimgtime}</td>
+              <td><b>Timestamp :</b> {this.state.orgimgtime}<br/>
+                  <b>Similarity Score :</b> {this.state.simscore}
+              </td>
             </tr>
 
           </table>

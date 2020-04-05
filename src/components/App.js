@@ -139,13 +139,13 @@ class App extends Component {
       })
 
       this.setState({ ht: false });
-    } //try
+    } 
     catch (error) {
       console.log(error);
       alert("First Upload Image To Get Transaction Details")
-    } //catch
+    } 
 
-  } //onClick
+  }
 
 
   render() {
