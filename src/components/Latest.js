@@ -79,7 +79,7 @@ class Latest extends Component {
     let block
     let latestBlocks = []
     let times = []
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < latestBlock.number; i++) {
       block = await web3.eth.getBlock(latestBlock.number - i)
       //console.log(block)
       if (block.number === 4) { break; }
@@ -157,13 +157,15 @@ class Latest extends Component {
         </nav>
 
 
-        <div id="latestimg">
 
+        <div>
+        <p>&nbsp;</p>
           <center>
             <h2>Latest Images in Blockchain</h2>
+            <p>&nbsp;</p>
             <button onClick={this.retrieve}>Click me</button>
           </center>
-
+          <p>&nbsp;</p>
           <div className="card-body">
             <table className="table">
               <thead>
@@ -188,11 +190,7 @@ class Latest extends Component {
               </tbody>
             </table>
           </div>
-
-
         </div>
-
-
       </div>
     );
   }

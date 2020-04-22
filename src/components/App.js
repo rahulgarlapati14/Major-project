@@ -16,6 +16,7 @@ class App extends Component {
   async componentWillMount() {
     await this.loadWeb3()
     await this.loadBlockchainData()
+    await this.retEvents()
   }
 
   async loadWeb3() {
@@ -44,10 +45,10 @@ class App extends Component {
     const networkData = Meme.networks[networkId]
     if (networkData) {
       const contract = web3.eth.Contract(Meme.abi, networkData.address)
-     
+
       this.setState({ contract })
       this.setState({ ethAddress: networkData.address })
-    } 
+    }
     else {
       window.alert('Smart contract not deployed to detected network.')
     }
@@ -68,8 +69,43 @@ class App extends Component {
       gasUsed: '',
       txReceipt: '',
       timestamp: '',
-      ht: true
+      ht: true,
+      presentHashes: []
     }
+  }
+
+
+  retHash = async (args) => {
+    //console.log(args)
+    let re = []
+    for (let i = 0; i < args.length; i++) {
+      //console.log(args[i].returnValues[1])
+      re.push(args[i].returnValues[1])
+    }
+    re.reverse()
+    console.log(re)
+    this.setState({ presentHashes: re })
+
+  }
+
+  retEvents = async () => {
+
+    let t = this;
+    this.state.contract.getPastEvents('HashCreated', {
+      fromBlock: 0,
+      toBlock: 'latest'
+    }, function (error, events) {
+      t.retHash(events);
+      //console.log(events); 
+    })
+  }
+
+  checkDuplicate = async (args) => {
+
+    if (this.state.presentHashes.indexOf(args) < 0)
+      this.setState({ check: false })
+    else
+      this.setState({ check: true })
   }
 
 
@@ -100,16 +136,24 @@ class App extends Component {
       // this.setState({ memeHash: result[0].hash })
       if (error) {
         //console.error(error)
-        alert("Please Upload Image amd then click Upload");
+        alert("Please Upload Image amd then Click Upload");
         return
       }
+      this.checkDuplicate(result[0].hash);
 
-      this.state.contract.methods.set(result[0].hash).send({ from: this.state.account }, (error, transactionHash) => {
-        console.log(transactionHash);
-        this.setState({ transactionHash });
-        this.setState({ memeHash: result[0].hash })
-      })
+      if (this.state.check) {
+        alert("This Image is Aready Present In Blockchain");
+        return
+      }
+      else {
+        this.state.contract.methods.set(result[0].hash).send({ from: this.state.account }, (error, transactionHash) => {
+          console.log(transactionHash);
+          this.setState({ transactionHash });
+          this.setState({ memeHash: result[0].hash })
+        })
+      }
     })
+
   }
   //
 
@@ -139,11 +183,11 @@ class App extends Component {
       })
 
       this.setState({ ht: false });
-    } 
+    }
     catch (error) {
       console.log(error);
       alert("First Upload Image To Get Transaction Details")
-    } 
+    }
 
   }
 
@@ -198,10 +242,10 @@ class App extends Component {
                   <thead>
                     <tr>
                       <th>Tx Receipt Category</th>
-                      <th>Values</th>
+                      <center><th>Values</th></center>
                     </tr>
                   </thead>
-
+                  
                   <tbody>
                     <tr>
                       <td>IPFS Hash of Image Stored on Eth Contract</td>
