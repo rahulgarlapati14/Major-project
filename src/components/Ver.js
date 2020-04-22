@@ -72,8 +72,9 @@ class Ver extends Component {
     originalImage: '',
     loading: false,
     latestbno: [],
-    latesttimes:[],
-    simscore:''
+    latesttimes: [],
+    ht: true,
+    simscore: ''
   }
 
   async getBlockDetails() {
@@ -86,8 +87,8 @@ class Ver extends Component {
     let block
     let latestBlocks = []
     let times = []
-    let i=0
-    while(true) {
+    let i = 0
+    while (true) {
       block = await web3.eth.getBlock(latestBlock.number - i)
       //console.log(block)
       if (block.number === 4) { break; }
@@ -167,7 +168,7 @@ class Ver extends Component {
 
   }
 
-  
+
   verifyImage = async (upHash) => {
 
     this.setState({ fakeImage: upHash });
@@ -178,7 +179,7 @@ class Ver extends Component {
 
     console.log(this.state.imgURLS);
     var imgURLS = this.state.imgURLS;
-    
+
     await app.inputs.delete();
     for (let i = 0; i < imgURLS.length; i++) {
       await app.inputs.create([
@@ -197,28 +198,39 @@ class Ver extends Component {
       function (response) {
         console.log(response.hits[0].score);
         console.log(response.hits[0].input.data.image);
-        t.setState({ originalImage: response.hits[0].input.data.image.url,
-                     simscore:response.hits[0].score,
-                    loading: false })
-  
+        t.setState({
+          originalImage: response.hits[0].input.data.image.url,
+          simscore: response.hits[0].score,
+          loading: false
+        })
+
       },
       function (err) {
         console.log(err);
       }
     );
-    
 
-    let a=t.state.originalImage;
-    let b=t.state.imgURLS;
-    let c=t.state.latesttimes;
+
+    let a = t.state.originalImage;
+    let b = t.state.imgURLS;
+    let c = t.state.latesttimes;
     console.log(c[b.indexOf(a)])
-    this.setState({orgimgtime:c[b.indexOf(a)]})
+    this.setState({ orgimgtime: c[b.indexOf(a)] })
+    this.setState({ ht: false })
 
-   
+
   }
 
-  
+
   render() {
+
+    const divstyle = {
+      margin: "auto",
+      "padding-left": "25%"
+  
+    }
+
+    const style = this.state.ht ? { display: 'none' } : {};
 
     return (
       <div>
@@ -245,7 +257,7 @@ class Ver extends Component {
                   href=""
                 >
                 </a>
-                <h1>Image</h1>
+                <h1>Image Verification</h1>
                 <p>&nbsp;</p>
                 <h2>Upload Image</h2>
                 <p>&nbsp;</p>
@@ -260,24 +272,25 @@ class Ver extends Component {
           </div>
         </div>
 
-        <div >
-
-          <table width="70%">
+        <div style={divstyle}>
+          <table width="80%">
+            <tr><center>{<Loader visible={this.state.loading} type="TailSpin" height='100' width='100' />}</center></tr>
             <tr>
               <th>Uploaded Image</th>
               <th>Original Image</th>
-              <th>Details</th>
             </tr>
-
             <tr>
               <td><img alt="" src={this.state.fakeImage} /></td>
               <td>
-                {<Loader visible={this.state.loading} type="Rings" height='200' width='200' />}
                 <img alt="" src={this.state.originalImage} />
               </td>
-              <td><b>Timestamp :</b> {this.state.orgimgtime}<br/>
-                  <b>Similarity Score :</b> {this.state.simscore}
-              </td>
+            </tr>
+            <tr style={style}>
+            
+            <td>
+                <b>Timestamp :</b> {this.state.orgimgtime}<br />
+                <b>Similarity Score :</b> {this.state.simscore}
+            </td>
             </tr>
 
           </table>
