@@ -94,7 +94,6 @@ class Ver extends Component {
       if (block.number === 4) { break; }
       latestBlocks.push(block)
 
-
       let utcSeconds = block.timestamp;
       let d = new Date(0);
       d.setUTCSeconds(utcSeconds);
@@ -173,13 +172,9 @@ class Ver extends Component {
 
     this.setState({ fakeImage: upHash });
     console.log(upHash);
-
     this.setState({ loading: true });
-
-
     console.log(this.state.imgURLS);
     var imgURLS = this.state.imgURLS;
-
     await app.inputs.delete();
     for (let i = 0; i < imgURLS.length; i++) {
       await app.inputs.create([
@@ -209,16 +204,12 @@ class Ver extends Component {
         console.log(err);
       }
     );
-
-
     let a = t.state.originalImage;
     let b = t.state.imgURLS;
     let c = t.state.latesttimes;
     console.log(c[b.indexOf(a)])
     this.setState({ orgimgtime: c[b.indexOf(a)] })
     this.setState({ ht: false })
-
-
   }
 
 

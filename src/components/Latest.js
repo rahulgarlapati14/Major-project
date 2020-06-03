@@ -74,8 +74,6 @@ class Latest extends Component {
     const web3 = window.web3
     let latestBlock = await web3.eth.getBlock('latest')
     //console.log('latest block', latestBlock)
-
-
     let block
     let latestBlocks = []
     let times = []
@@ -84,21 +82,16 @@ class Latest extends Component {
       //console.log(block)
       if (block.number === 4) { break; }
       latestBlocks.push(block)
-
-
       let utcSeconds = block.timestamp;
       let d = new Date(0);
       d.setUTCSeconds(utcSeconds);
       times.push(d.toString().slice(0, 25));
     }
-
-
     this.setState({
       latestbno: latestBlocks,
       latesttimes: times
     })
     console.log(this.state.latesttimes)
-
   }
 
 
@@ -123,10 +116,7 @@ class Latest extends Component {
     }, function (error, events) {
       t.res(events);
       //console.log(events);   
-
     })
-
-
   }
 
   render() {

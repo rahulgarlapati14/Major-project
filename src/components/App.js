@@ -127,10 +127,8 @@ class App extends Component {
 
   //2
   onSubmit = (event) => {
-
     event.preventDefault()
     console.log("Submitting file to IPFS...")
-
     ipfs.add(this.state.buffer, (error, result) => {
       console.log('IPFS result', result)
       // this.setState({ memeHash: result[0].hash })
@@ -140,7 +138,6 @@ class App extends Component {
         return
       }
       this.checkDuplicate(result[0].hash);
-
       if (this.state.check) {
         alert("This Image is Aready Present In Blockchain");
         return
@@ -153,7 +150,6 @@ class App extends Component {
         })
       }
     })
-
   }
   //
 
