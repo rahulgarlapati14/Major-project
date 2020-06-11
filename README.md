@@ -40,4 +40,6 @@ Install the Metamask Ethereum Wallet from this [link](https://chrome.google.com/
 - After entering into image verification module, the uploaded image is checked with stored images.
 - The original image is detected and displays the original image along with the similarity score.
 
+##### DEMO
 
+   ![DEMO](Project%20images/demos/20200611_195129.gif)
