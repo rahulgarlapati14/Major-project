@@ -68,7 +68,7 @@ class Latest extends Component {
     }
 
   }
-
+  
   async getBlockDetails() {
 
     const web3 = window.web3

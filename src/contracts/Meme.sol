@@ -8,7 +8,6 @@ contract Meme {
     memeHash = _memeHash;
     emit HashCreated(msg.sender,_memeHash);
   }
-
   function get() public view returns (string memory) {
     return memeHash;
   }
